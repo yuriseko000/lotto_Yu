@@ -49,6 +49,27 @@ class _MyLottoPageState extends State<MyLottoPage> {
     ],
   };
 
+  // เพิ่มตัวแปรสำหรับค้นหา
+  final TextEditingController _searchController = TextEditingController();
+  String _searchText = '';
+
+  // ฟังก์ชันกรองล็อตเตอรี่ตามเลขที่ค้นหา
+  Map<String, List<Map<String, dynamic>>> get filteredLottoByDate {
+    if (_searchText.isEmpty) return lottoByDate;
+    final Map<String, List<Map<String, dynamic>>> filtered = {};
+    lottoByDate.forEach((date, tickets) {
+      final filteredTickets = tickets.where((lotto) {
+        final number = lotto["number"]?.toString() ?? '';
+        return number.contains(_searchText);
+      }).toList();
+      if (filteredTickets.isNotEmpty) {
+        filtered[date] = filteredTickets;
+      }
+    });
+    return filtered;
+  }
+  //---------------------------------------แก้ไข---------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +77,6 @@ class _MyLottoPageState extends State<MyLottoPage> {
         title: Text('My Lotto - ${widget.customer.fullname}'),
         backgroundColor: const Color(0xFF001E46),
       ),
-      //-----------------------------------แก้ไข------------------------------------------------------
       body: Column(
         children: [
           Padding(
@@ -66,20 +86,41 @@ class _MyLottoPageState extends State<MyLottoPage> {
                 Expanded(
                   flex: 3,
                   child: TextField(
+                    controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'ค้นหาล็อตเตอรี่',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                       prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              //---------------------------------------แก้ไข---------------------------------------------------
+                              onPressed: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  _searchText = '';
+                                });
+                              },
+                              //---------------------------------------แก้ไข---------------------------------------------------
+                            )
+                          : null,
                     ),
+                    onChanged: (value) {
+                      setState(() {}); // เพื่อให้ suffixIcon อัปเดต
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),
                 Flexible(
                   flex: 1,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        _searchText = _searchController.text.trim();
+                      });
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF001E46),
                       minimumSize: const Size(double.infinity, 48),
@@ -96,7 +137,7 @@ class _MyLottoPageState extends State<MyLottoPage> {
               ],
             ),
           ),
-          //-----------------------------------แก้ไข------------------------------------------------------
+          //---------------------------------------แก้ไข---------------------------------------------------
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
@@ -116,7 +157,7 @@ class _MyLottoPageState extends State<MyLottoPage> {
           ),
           Expanded(
             child: ListView(
-              children: lottoByDate.entries.expand((entry) {
+              children: filteredLottoByDate.entries.expand((entry) {
                 final date = entry.key;
                 final tickets = entry.value;
                 return tickets.map((lotto) {
@@ -239,7 +280,7 @@ class _MyLottoPageState extends State<MyLottoPage> {
               }).toList(),
             ),
           ),
-          //----------------------------------------แก้ไข-------------------------------------------------
+          //---------------------------------------แก้ไข---------------------------------------------------
           _footer(context),
         ],
       ),
