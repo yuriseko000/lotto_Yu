@@ -1,11 +1,10 @@
-// mock backend สำหรับตรวจผลลอตเตอรี่
 import '../model/lotto_ticket.dart';
 import 'package:http/http.dart' as http; // สำหรับ http.get
 import 'dart:convert'; // สำหรับ jsonDecode
 import '../config.dart'; // สำหรับ AppConfig
 
 class LottoService {
-  // สมมุติรางวัลที่ออก (จริงๆ ฝั่งสุ่มออกรางวัลของเพื่อนต้องส่งเข้ามา)
+  // สมมุติรางวัลที่ออก (ไว้เชื่อมฝัง backend จริง)
   final String winningNumber = "123456";
 
   // ฟังก์ชันตรวจผล
